@@ -9,7 +9,7 @@ spec:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
     command:
-      - cat
+      - /busybox/sh
     tty: true
     volumeMounts:
       - name: docker-config
@@ -23,8 +23,8 @@ spec:
   }
 
   environment {
-    REGISTRY = "localhost:30003"
-    IMAGE = "cicd-lab/app"
+    REGISTRY = "harbor.local"
+    IMAGE = "library/cicd-lab-app"
     TAG = "${BUILD_NUMBER}"
   }
 
@@ -40,9 +40,10 @@ spec:
         container('kaniko') {
           sh """
             /kaniko/executor \
-              --context=dir://\$(pwd) \
-              --dockerfile=Dockerfile \
-              --destination=$REGISTRY/$IMAGE:$TAG
+              --context \$WORKSPACE \
+              --dockerfile \$WORKSPACE/Dockerfile \
+              --destination ${REGISTRY}/${IMAGE}:${TAG} \
+              --skip-tls-verify
           """
         }
       }
