@@ -9,16 +9,11 @@ spec:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
     command:
-      - /kaniko/executor
-    args:
-      - --dockerfile=Dockerfile
-      - --context=\$(WORKSPACE)
-      - --destination=harbor.local/library/cicd-lab-app:\$(BUILD_NUMBER)
-      - --skip-tls-verify
+      - cat
+    tty: true
     volumeMounts:
       - name: docker-config
         mountPath: /kaniko/.docker
-  restartPolicy: Never
   volumes:
     - name: docker-config
       secret:
@@ -27,10 +22,31 @@ spec:
     }
   }
 
+  environment {
+    REGISTRY = "localhost:30003"
+    IMAGE    = "cicd-lab-app"
+    TAG      = "${BUILD_NUMBER}"
+  }
+
   stages {
+
     stage('Build App') {
       steps {
         sh 'mvn clean package -DskipTests'
+      }
+    }
+
+    stage('Build & Push Image') {
+      steps {
+        container('kaniko') {
+          sh '''
+            /kaniko/executor \
+              --context=dir:///home/jenkins/agent \
+              --dockerfile=Dockerfile \
+              --destination=${REGISTRY}/${IMAGE}:${TAG} \
+              --skip-tls-verify
+          '''
+        }
       }
     }
   }
