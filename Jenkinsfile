@@ -6,14 +6,22 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    command:
-      - cat
-    tty: true
-    volumeMounts:
-      - name: docker-config
-        mountPath: /kaniko/.docker
+    - name: maven
+      image: maven:3.9-eclipse-temurin-17
+      command: ["cat"]
+      tty: true
+
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      args:
+        - --dockerfile=Dockerfile
+        - --context=\$(WORKSPACE)
+        - --destination=harbor.local/library/cicd-lab-app:\$(BUILD_NUMBER)
+        - --skip-tls-verify
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+
   volumes:
     - name: docker-config
       secret:
@@ -22,30 +30,20 @@ spec:
     }
   }
 
-  environment {
-    REGISTRY = "localhost:30003"
-    IMAGE    = "cicd-lab-app"
-    TAG      = "${BUILD_NUMBER}"
-  }
-
   stages {
 
     stage('Build App') {
       steps {
-        sh 'mvn clean package -DskipTests'
+        container('maven') {
+          sh 'mvn clean package -DskipTests'
+        }
       }
     }
 
     stage('Build & Push Image') {
       steps {
         container('kaniko') {
-          sh '''
-            /kaniko/executor \
-              --context=dir:///home/jenkins/agent \
-              --dockerfile=Dockerfile \
-              --destination=${REGISTRY}/${IMAGE}:${TAG} \
-              --skip-tls-verify
-          '''
+          echo "Kaniko build & push"
         }
       }
     }
