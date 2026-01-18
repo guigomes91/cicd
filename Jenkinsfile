@@ -6,19 +6,25 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+    - name: maven
+      image: maven:3.9-eclipse-temurin-17
+      command:
+        - cat
+      tty: true
 
-  - name: maven
-    image: maven:3.9-eclipse-temurin-17
-    command: ["cat"]
-    tty: true
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - /kaniko/executor
+      args:
+        - "--help"
+      tty: true
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
 
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    command: ["/busybox/cat"]
-    tty: true
-    volumeMounts:
-      - name: docker-config
-        mountPath: /kaniko/.docker
+    - name: jnlp
+      image: jenkins/inbound-agent:3355.v388858a_47b_33-2-jdk21
 
   volumes:
     - name: docker-config
@@ -26,6 +32,12 @@ spec:
         secretName: harbor-cred
 """
     }
+  }
+
+  environment {
+    REGISTRY = "harbor.local/library"
+    IMAGE    = "cicd-lab-app"
+    TAG      = "${BUILD_NUMBER}"
   }
 
   stages {
@@ -43,9 +55,9 @@ spec:
         container('kaniko') {
           sh '''
             /kaniko/executor \
-              --dockerfile=Dockerfile \
               --context=$WORKSPACE \
-              --destination=harbor.local/library/cicd-lab-app:${BUILD_NUMBER} \
+              --dockerfile=$WORKSPACE/Dockerfile \
+              --destination=${REGISTRY}/${IMAGE}:${TAG} \
               --skip-tls-verify
           '''
         }
