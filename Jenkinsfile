@@ -32,7 +32,8 @@ spec:
         memory: "1Gi"
     volumeMounts:
       - name: docker-config
-        mountPath: /kaniko/.docker
+        mountPath: /kaniko/.docker/config.json
+        subPath: .dockerconfigjson
 
   volumes:
     - name: docker-config
