@@ -43,8 +43,8 @@ spec:
   }
 
   environment {
-    REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000/library"
-    IMAGE    = "cicd/cicd-lab-app"
+    REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000/cicd"
+    IMAGE    = "cicd-lab-app"
     TAG      = "${BUILD_NUMBER}"
     MAVEN_OPTS = "-Xms256m -Xmx512m"
   }
