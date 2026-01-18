@@ -44,23 +44,13 @@ spec:
 
   environment {
     REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
+	IMAGE_NAME = "cicd-api"
 	PROJECT  = "cicd"
     TAG      = "${BUILD_NUMBER}"
     MAVEN_OPTS = "-Xms256m -Xmx512m"
   }
 
   stages {
-  
-	  stage('Prepare Vars') {
-	  steps {
-		script {
-		  IMAGE = sh(
-			script: "basename -s .git ${env.GIT_URL}",
-			returnStdout: true
-		  ).trim()
-		}
-	  }
-	}
 
     stage('Build App') {
       steps {
@@ -77,7 +67,7 @@ spec:
             /kaniko/executor \
               --context=$WORKSPACE \
               --dockerfile=$WORKSPACE/Dockerfile \
-              --destination=${REGISTRY}/${PROJECT}/${IMAGE}:${TAG} \
+              --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
 			  --insecure-registry=harbor-registry.cicd.svc.cluster.local:5000 \
               --skip-tls-verify
           '''
