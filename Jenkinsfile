@@ -45,12 +45,22 @@ spec:
   environment {
     REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
 	PROJECT  = "cicd"
-    IMAGE    = "cicd-lab-app"
     TAG      = "${BUILD_NUMBER}"
     MAVEN_OPTS = "-Xms256m -Xmx512m"
   }
 
   stages {
+  
+	  stage('Prepare Vars') {
+	  steps {
+		script {
+		  IMAGE = sh(
+			script: "basename -s .git ${env.GIT_URL}",
+			returnStdout: true
+		  ).trim()
+		}
+	  }
+	}
 
     stage('Build App') {
       steps {
