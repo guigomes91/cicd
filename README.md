@@ -23,6 +23,23 @@ Orquestrar o fluxo completo **CI → CD**, desde o push no GitHub até o deploy 
 
 ## 🔄 Fluxo CI/CD
 
+### Visão lógica do pipeline
+
+```mermaid
+graph TD
+    A[GitHub - Push] --> B[Jenkins CI]
+    B --> B1[Build]
+    B --> B2[Testes]
+    B --> B3[Build Image - Kaniko]
+    B3 --> B4[Push para Harbor]
+    B4 --> C[Spinnaker CD]
+    C --> C1[Deploy no Kubernetes]
+    C --> C2[Versionamento]
+    C --> C3[Rollback]
+```
+
+### Fluxo textual simplificado
+
 ```text
 GitHub
   ↓ (push)
