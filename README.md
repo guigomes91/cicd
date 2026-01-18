@@ -1,23 +1,25 @@
 # CI/CD Lab
 
-Laboratório local para simular um **pipeline CI/CD completo**, com ferramentas amplamente utilizadas em ambientes reais de produção.
+Laboratório **CI/CD local** para simular pipelines reais utilizados em ambientes corporativos, utilizando Kubernetes e ferramentas amplamente adotadas no mercado.
+
+Este projeto foi criado com foco em **estudo, POCs e experimentação prática**, permitindo validar decisões de arquitetura e automação antes de levá-las para ambientes cloud.
 
 ---
 
 ## 🎯 Objetivo
 
-Orquestrar o fluxo completo **CI → CD**, desde o push no GitHub até o deploy no Kubernetes, permitindo testes locais realistas de build, versionamento, deploy e rollback.
+Demonstrar e orquestrar um fluxo completo de **Continuous Integration e Continuous Delivery (CI → CD)**, cobrindo desde o push de código até o deploy versionado no Kubernetes, com suporte a rollback.
 
 ---
 
-## 🧰 O que esse lab faz
+## 🧰 Stack utilizada
 
-* ✅ **Kind** como cluster Kubernetes local
-* ✅ **Jenkins** rodando dentro do Kubernetes
-* ✅ **Harbor** como registry privado de imagens Docker
-* ✅ **Spinnaker** para Continuous Delivery
-* ✅ Aplicação de exemplo com **Dockerfile**
-* ✅ Pipeline de **CI no Jenkins** usando **Kaniko** (sem Docker-in-Docker)
+* **Kubernetes local:** Kind
+* **CI:** Jenkins (executando dentro do cluster)
+* **Build de imagens:** Kaniko (sem Docker-in-Docker)
+* **Registry:** Harbor (privado)
+* **CD:** Spinnaker
+* **Aplicação com Spring:** Exemplo containerizado com Dockerfile
 
 ---
 
@@ -38,7 +40,7 @@ graph TD
     C --> C3[Rollback]
 ```
 
-### Fluxo textual simplificado
+### Fluxo resumido
 
 ```text
 GitHub
@@ -57,26 +59,43 @@ Spinnaker (CD)
 
 ---
 
-## 🧪 O que pode ser testado neste lab
+## 🧪 O que pode ser explorado neste laboratório
 
-* Estratégias de CI em Kubernetes
-* Build de imagens sem acesso ao Docker daemon
-* Integração Jenkins + Harbor
-* Deploy contínuo com Spinnaker
+* Execução de CI dentro do Kubernetes
+* Build seguro de imagens sem acesso ao Docker daemon
+* Integração entre Jenkins e Harbor
+* Estratégias de deploy contínuo com Spinnaker
 * Versionamento e rollback de aplicações
+
+---
+
+## ⚙️ Requisitos
+
+* Docker
+* Kind
+* kubectl
+* Helm
+
+> ⚠️ Recomendado rodar em máquinas com pelo menos **8GB de RAM**.
 
 ---
 
 ## 📌 Observações
 
 * Todo o ambiente roda **localmente**
-* Ideal para estudo, POCs e validação de pipelines antes de levar para cloud
-* O setup simula problemas e decisões comuns de ambientes corporativos
+* Não depende de cloud provider
+* Ideal para aprendizado, testes e validações técnicas
 
 ---
 
-## 🚀 Próximos passos (opcional)
+## 🚀 Próximos passos
 
 * Adicionar scan de vulnerabilidades no Harbor
-* Integrar testes de qualidade (SonarQube)
+* Integrar análise de qualidade (SonarQube)
 * Simular múltiplos ambientes (dev / stage / prod)
+
+---
+
+## 📄 Licença
+
+Projeto para fins educacionais e experimentais.
