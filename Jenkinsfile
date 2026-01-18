@@ -67,6 +67,7 @@ spec:
               --context=$WORKSPACE \
               --dockerfile=$WORKSPACE/Dockerfile \
               --destination=${REGISTRY}/${IMAGE}:${TAG} \
+			  --insecure \
               --skip-tls-verify
           '''
         }
