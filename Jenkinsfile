@@ -6,25 +6,33 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-    - name: maven
-      image: maven:3.9-eclipse-temurin-17
-      command:
-        - cat
-      tty: true
 
-    - name: kaniko
-      image: gcr.io/kaniko-project/executor:latest
-      command:
-        - /kaniko/executor
-      args:
-        - "--help"
-      tty: true
-      volumeMounts:
-        - name: docker-config
-          mountPath: /kaniko/.docker
+  - name: maven
+    image: maven:3.9-eclipse-temurin-17
+    command: ["cat"]
+    tty: true
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
 
-    - name: jnlp
-      image: jenkins/inbound-agent:3355.v388858a_47b_33-2-jdk21
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:latest
+    command: ["cat"]
+    tty: true
+    resources:
+      requests:
+        cpu: "300m"
+        memory: "512Mi"
+      limits:
+        cpu: "800m"
+        memory: "1Gi"
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
 
   volumes:
     - name: docker-config
@@ -38,6 +46,7 @@ spec:
     REGISTRY = "harbor.local/library"
     IMAGE    = "cicd-lab-app"
     TAG      = "${BUILD_NUMBER}"
+    MAVEN_OPTS = "-Xms256m -Xmx512m"
   }
 
   stages {
