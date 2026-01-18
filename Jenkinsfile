@@ -43,7 +43,8 @@ spec:
   }
 
   environment {
-    REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000/cicd"
+    REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
+	PROJECT  = "cicd"
     IMAGE    = "cicd-lab-app"
     TAG      = "${BUILD_NUMBER}"
     MAVEN_OPTS = "-Xms256m -Xmx512m"
@@ -66,8 +67,8 @@ spec:
             /kaniko/executor \
               --context=$WORKSPACE \
               --dockerfile=$WORKSPACE/Dockerfile \
-              --destination=${REGISTRY}/${IMAGE}:${TAG} \
-			  --insecure \
+              --destination=${REGISTRY}/${PROJECT}/${IMAGE}:${TAG} \
+			  --insecure-registry=harbor-registry.cicd.svc.cluster.local:5000 \
               --skip-tls-verify
           '''
         }
