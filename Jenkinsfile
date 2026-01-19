@@ -35,18 +35,18 @@ spec:
       volumeMounts:
         - name: docker-config
           mountPath: /kaniko/.docker/config.json
-          subPath: .dockerconfigjson
+          subPath: config.json
 
   volumes:
     - name: docker-config
       secret:
-        secretName: harbor-cred
+        secretName: kaniko-docker-config
 """
         }
     }
 
     environment {
-        REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
+        REGISTRY = "harbor.cicd.svc.cluster.local"
         IMAGE_NAME = "cicd-api"
         PROJECT  = "cicd"
         TAG      = "${BUILD_NUMBER}"
@@ -70,9 +70,8 @@ spec:
   --context=$WORKSPACE \
   --dockerfile=$WORKSPACE/Dockerfile \
   --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
-  --insecure \
-  --skip-tls-verify
-                    '''
+  --insecure
+'''
                 }
             }
         }
