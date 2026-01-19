@@ -69,8 +69,8 @@ spec:
               --context=$WORKSPACE \
               --dockerfile=$WORKSPACE/Dockerfile \
               --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
-			  --insecure-registry=harbor-registry.cicd.svc.cluster.local:5000 \
-              --skip-tls-verify
+			  --insecure \
+			  --skip-tls-verify
           '''
         }
       }
