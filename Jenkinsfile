@@ -1,88 +1,85 @@
 pipeline {
-  agent {
-    kubernetes {
-      yaml """
+    agent {
+        kubernetes {
+            yaml """
 apiVersion: v1
 kind: Pod
 spec:
   initContainers:
-  
-  - name: kaniko-init
-	image: busybox
-	command: ["sh", "-c", "mkdir -p /kaniko/.docker && chmod 700 /kaniko/.docker"]
-	volumeMounts:
-		- name: docker-config
-		mountPath: /kaniko/.docker
-		
+    - name: kaniko-init
+      image: busybox
+      command: ["sh", "-c", "mkdir -p /kaniko/.docker && chmod 700 /kaniko/.docker"]
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+
   containers:
+    - name: maven
+      image: maven:3.9-eclipse-temurin-17
+      command: ["cat"]
+      tty: true
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+        limits:
+          cpu: "1000m"
+          memory: "1Gi"
 
-  - name: maven
-    image: maven:3.9-eclipse-temurin-17
-    command: ["cat"]
-    tty: true
-    resources:
-      requests:
-        cpu: "500m"
-        memory: "512Mi"
-      limits:
-        cpu: "1000m"
-        memory: "1Gi"
-
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:debug
-    command: ["cat"]
-    tty: true
-    resources:
-      requests:
-        cpu: "300m"
-        memory: "512Mi"
-      limits:
-        cpu: "800m"
-        memory: "1Gi"
-    volumeMounts:
-      - name: docker-config
-        mountPath: /kaniko/.docker/config.json
-        subPath: .dockerconfigjson
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      command: ["cat"]
+      tty: true
+      resources:
+        requests:
+          cpu: "300m"
+          memory: "512Mi"
+        limits:
+          cpu: "800m"
+          memory: "1Gi"
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker/config.json
+          subPath: .dockerconfigjson
 
   volumes:
     - name: docker-config
       secret:
         secretName: harbor-cred
 """
-    }
-  }
-
-  environment {
-    REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
-	IMAGE_NAME = "cicd-api"
-	PROJECT  = "cicd"
-    TAG      = "${BUILD_NUMBER}"
-    MAVEN_OPTS = "-Xms256m -Xmx512m"
-  }
-
-  stages {
-
-    stage('Build App') {
-      steps {
-        container('maven') {
-          sh 'mvn clean package -DskipTests'
         }
-      }
     }
 
-    stage('Build & Push Image') {
-      steps {
-        container('kaniko') {
-          sh '''
-            /kaniko/executor \
-              --context=$WORKSPACE \
-              --dockerfile=$WORKSPACE/Dockerfile \
-              --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
-			  --insecure \
-			  --skip-tls-verify
-          '''
-        }
-      }
+    environment {
+        REGISTRY = "harbor-registry.cicd.svc.cluster.local:5000"
+        IMAGE_NAME = "cicd-api"
+        PROJECT  = "cicd"
+        TAG      = "${BUILD_NUMBER}"
+        MAVEN_OPTS = "-Xms256m -Xmx512m"
     }
-  }
+
+    stages {
+        stage('Build App') {
+            steps {
+                container('maven') {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Build & Push Image') {
+            steps {
+                container('kaniko') {
+                    sh '''
+/kaniko/executor \
+  --context=$WORKSPACE \
+  --dockerfile=$WORKSPACE/Dockerfile \
+  --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
+  --insecure \
+  --skip-tls-verify
+                    '''
+                }
+            }
+        }
+    }
 }
