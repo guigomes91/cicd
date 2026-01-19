@@ -5,6 +5,15 @@ pipeline {
 apiVersion: v1
 kind: Pod
 spec:
+  initContainers:
+  
+  - name: kaniko-init
+	image: busybox
+	command: ["sh", "-c", "mkdir -p /kaniko/.docker && chmod 700 /kaniko/.docker"]
+	volumeMounts:
+		- name: docker-config
+		mountPath: /kaniko/.docker
+		
   containers:
 
   - name: maven
