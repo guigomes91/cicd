@@ -60,9 +60,6 @@ spec:
   stages {
 
     stage('Build App') {
-      when {
-        branch 'master'
-      }
       steps {
         container('maven') {
           sh 'mvn clean package -DskipTests'
