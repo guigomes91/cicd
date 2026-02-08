@@ -74,6 +74,7 @@ spec:
   --dockerfile=$WORKSPACE/Dockerfile \
   --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
   --insecure
+  --cleanup
 '''
                 }
             }
