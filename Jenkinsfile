@@ -44,7 +44,6 @@ spec:
           subPath: config.json
         - name: git-ssh
           mountPath: /root/.ssh
-          readOnly: true
 
   volumes:
     - name: docker-config
@@ -57,6 +56,7 @@ spec:
     - name: git-ssh
       secret:
         secretName: jenkins-gitops-ssh
+		defaultMode: 0400
 """
     }
   }
@@ -101,8 +101,6 @@ spec:
       steps {
         container('maven') {
           sh '''
-            chmod 600 /root/.ssh/id_ed25519
-
             git clone git@github.com:guigomes91/gitops-repo.git
             cd gitops-repo/cicd-api/app
 
