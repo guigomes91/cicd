@@ -42,8 +42,6 @@ spec:
         - name: docker-config
           mountPath: /kaniko/.docker/config.json
           subPath: config.json
-        - name: git-ssh
-          mountPath: /root/.ssh
 
   volumes:
     - name: docker-config
@@ -56,7 +54,7 @@ spec:
     - name: git-ssh
       secret:
         secretName: jenkins-gitops-ssh
-		defaultMode: 0400
+        defaultMode: 0400
 """
     }
   }
@@ -101,6 +99,8 @@ spec:
       steps {
         container('maven') {
           sh '''
+            export GIT_SSH_COMMAND="ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=yes"
+
             git clone git@github.com:guigomes91/gitops-repo.git
             cd gitops-repo/cicd-api/app
 
@@ -109,7 +109,7 @@ spec:
             git config user.email "guilherme.gomes91@outlook.com"
             git config user.name "guigomes91"
 
-            git commit -am "chore(gitops): update image ${TAG}"
+            git diff --quiet || git commit -am "chore(gitops): update image ${TAG}"
             git push origin master
           '''
         }
