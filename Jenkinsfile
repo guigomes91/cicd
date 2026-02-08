@@ -20,6 +20,12 @@ spec:
         limits:
           cpu: "1000m"
           memory: "1Gi"
+	  volumeMounts:
+		- name: maven-cache
+		mountPath: /root/.m2
+	  volumes:
+		- name: maven-cache
+		emptyDir: {}
 
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
