@@ -71,9 +71,6 @@ spec:
     }
 
     stage('Build & Push Image') {
-      when {
-        branch 'master'
-      }
       steps {
         container('kaniko') {
           sh """
