@@ -29,6 +29,7 @@ public class CiCDController {
         response.put("podIp", podIp);
         response.put("localPort", localPort);
         response.put("serverPort", serverPort == null ? "Nao informado" : serverPort);
+        response.put("CICD", "Jenkins + ArgoCD + K8S");
 
         return response;
     }
