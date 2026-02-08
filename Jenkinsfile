@@ -8,6 +8,7 @@ metadata:
   namespace: cicd
 spec:
   containers:
+
     - name: maven
       image: maven:3.9-eclipse-temurin-17
       command: ["cat"]
@@ -22,6 +23,9 @@ spec:
       volumeMounts:
         - name: maven-cache
           mountPath: /root/.m2
+        - name: git-ssh
+          mountPath: /root/.ssh
+          readOnly: true
 
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
@@ -38,22 +42,30 @@ spec:
         - name: docker-config
           mountPath: /kaniko/.docker/config.json
           subPath: config.json
+        - name: git-ssh
+          mountPath: /root/.ssh
+          readOnly: true
 
   volumes:
     - name: docker-config
       secret:
         secretName: kaniko-docker-config
+
     - name: maven-cache
       emptyDir: {}
+
+    - name: git-ssh
+      secret:
+        secretName: jenkins-gitops-ssh
 """
     }
   }
 
   environment {
-    REGISTRY = "harbor.cicd.svc.cluster.local"
-    PROJECT  = "cicd"
+    REGISTRY   = "harbor.cicd.svc.cluster.local"
+    PROJECT    = "cicd"
     IMAGE_NAME = "cicd-api"
-    TAG = "${BUILD_NUMBER}"
+    TAG        = "${BUILD_NUMBER}"
     MAVEN_OPTS = "-Xms256m -Xmx512m"
   }
 
@@ -62,7 +74,10 @@ spec:
     stage('Build App') {
       steps {
         container('maven') {
-          sh 'mvn clean package -DskipTests'
+          sh '''
+            mvn clean package -DskipTests
+            ls -lh target
+          '''
         }
       }
     }
@@ -70,29 +85,36 @@ spec:
     stage('Build & Push Image') {
       steps {
         container('kaniko') {
-          sh """
+          sh '''
 /kaniko/executor \
   --context=${WORKSPACE} \
   --dockerfile=${WORKSPACE}/Dockerfile \
   --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
   --insecure \
   --cleanup
-"""
+'''
         }
       }
     }
 
     stage('Update GitOps Repo') {
       steps {
-        sh """
-          git clone git@github.com:guigomes91/gitops-repo.git
-          cd gitops-repo/cicd-api/app
-          sed -i 's|image: .*|image: ${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG}|' deployment.yaml
-          git config user.email "guilherme.gomes91@outlook.com"
-          git config user.name "guigomes91"
-          git commit -am "chore: update image ${TAG}"
-          git push origin master
-        """
+        container('maven') {
+          sh '''
+            chmod 600 /root/.ssh/id_ed25519
+
+            git clone git@github.com:guigomes91/gitops-repo.git
+            cd gitops-repo/cicd-api/app
+
+            sed -i "s|image: .*|image: ${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG}|" deployment.yaml
+
+            git config user.email "guilherme.gomes91@outlook.com"
+            git config user.name "guigomes91"
+
+            git commit -am "chore(gitops): update image ${TAG}"
+            git push origin master
+          '''
+        }
       }
     }
   }
