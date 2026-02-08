@@ -83,9 +83,6 @@ spec:
     }
 
     stage('Update GitOps Repo') {
-      when {
-        branch 'master'
-      }
       steps {
         sh """
           git clone git@github.com:guigomes91/gitops-repo.git
