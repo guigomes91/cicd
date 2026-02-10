@@ -15,10 +15,14 @@ import java.util.Map;
 @RequestMapping(path = "/cicd/v1/", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CiCDController {
 
+    private final Environment environment;
+
     @Autowired
-    private Environment environment;
-    @GetMapping
-    @RequestMapping("entries")
+    public CiCDController(Environment environment) {
+        this.environment = environment;
+    }
+
+    @GetMapping("entries")
     public Map<String, Object> entrypoint(HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
 

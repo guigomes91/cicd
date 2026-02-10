@@ -95,13 +95,13 @@ spec:
           sh '''
             export GIT_SSH_COMMAND="ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=yes"
 
-            git clone git@github.com:guigomes91/gitops-repo.git
+            git clone git@github.com:example-org/gitops-repo.git
             cd gitops-repo/cicd-api/app
 
             sed -i "s|image: .*|image: ${REGISTRY_CD}/${PROJECT}/${IMAGE_NAME}:${TAG}|" deployment.yaml
 
-            git config user.email "guilherme.gomes91@outlook.com"
-            git config user.name "guigomes91"
+            git config user.email "gitops-bot@example.com"
+            git config user.name "gitops-bot"
 
             git diff --quiet || git commit -am "chore(gitops): update image ${TAG}"
             git push origin master
