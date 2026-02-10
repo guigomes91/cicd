@@ -81,6 +81,8 @@ spec:
   --context=${WORKSPACE} \
   --dockerfile=${WORKSPACE}/Dockerfile \
   --destination=${REGISTRY_CI}/${PROJECT}/${IMAGE_NAME}:${TAG} \
+  --insecure \
+  --skip-tls-verify \
   --cleanup
 '''
         }
