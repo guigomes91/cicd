@@ -38,16 +38,8 @@ spec:
         limits:
           cpu: "800m"
           memory: "1Gi"
-      volumeMounts:
-        - name: docker-config
-          mountPath: /kaniko/.docker/config.json
-          subPath: config.json
 
   volumes:
-    - name: docker-config
-      secret:
-        secretName: kaniko-docker-config
-
     - name: maven-cache
       emptyDir: {}
 
@@ -60,7 +52,8 @@ spec:
   }
 
   environment {
-    REGISTRY   = "harbor.cicd.svc.cluster.local"
+    REGISTRY_CI = "registry:5000"
+    REGISTRY_CD = "localhost:5000"
     PROJECT    = "cicd"
     IMAGE_NAME = "cicd-api"
     TAG        = "${BUILD_NUMBER}"
@@ -87,8 +80,7 @@ spec:
 /kaniko/executor \
   --context=${WORKSPACE} \
   --dockerfile=${WORKSPACE}/Dockerfile \
-  --destination=${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG} \
-  --insecure \
+  --destination=${REGISTRY_CI}/${PROJECT}/${IMAGE_NAME}:${TAG} \
   --cleanup
 '''
         }
@@ -104,7 +96,7 @@ spec:
             git clone git@github.com:guigomes91/gitops-repo.git
             cd gitops-repo/cicd-api/app
 
-            sed -i "s|image: .*|image: ${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${TAG}|" deployment.yaml
+            sed -i "s|image: .*|image: ${REGISTRY_CD}/${PROJECT}/${IMAGE_NAME}:${TAG}|" deployment.yaml
 
             git config user.email "guilherme.gomes91@outlook.com"
             git config user.name "guigomes91"
